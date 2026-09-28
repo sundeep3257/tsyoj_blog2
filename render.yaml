@@ -1,0 +1,45 @@
+services:
+  # Existing Python web service. A web service cannot be converted into a static site in place.
+  - type: web
+    name: blog-tsyoj
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+
+  # Static publish of the same pages. Create this service in Render, then move the domain when it looks right.
+  - type: web
+    name: blog-tsyoj-static
+    runtime: static
+    buildCommand: python -m pip install -r requirements.txt && python freeze.py
+    staticPublishPath: ./dist
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+    routes:
+      - type: rewrite
+        source: /songbird-magazine
+        destination: /songbird-magazine/index.html
+      - type: rewrite
+        source: /angsty-entries
+        destination: /angsty-entries/index.html
+      - type: rewrite
+        source: /quick-reads
+        destination: /quick-reads/index.html
+      - type: rewrite
+        source: /archive
+        destination: /archive/index.html
+      - type: rewrite
+        source: /about
+        destination: /about/index.html
+      - type: rewrite
+        source: /subscribe
+        destination: /subscribe/index.html
+      - type: rewrite
+        source: /admin/login
+        destination: /admin/login/index.html
+      - type: rewrite
+        source: /article/*
+        destination: /article/*/index.html
